@@ -7,7 +7,7 @@
 
 	export let data: PageData;
 
-	const documents = data.documents || [];
+	$: documents = data.documents || [];
 
 	let pollInterval: ReturnType<typeof setInterval> | null = null;
 	const POLL_INTERVAL_MS = 3000;

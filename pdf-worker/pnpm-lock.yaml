@@ -13,7 +13,7 @@ importers:
         version: 1.0.23(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0)
       '@langchain/community':
         specifier: ^1.1.23
-        version: 1.1.23(@browserbasehq/sdk@2.8.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.3.1)(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.9)(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))(ibm-cloud-sdk-core@5.4.9)(jsonwebtoken@9.0.3)(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(pdf-parse@1.1.4)(playwright@1.58.2)(redis@5.11.0)(ws@8.19.0)
+        version: 1.1.23(@browserbasehq/sdk@2.8.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.3.1)(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.9)(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))(@pinecone-database/pinecone@6.1.4)(ibm-cloud-sdk-core@5.4.9)(jsonwebtoken@9.0.3)(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(pdf-parse@1.1.4)(playwright@1.58.2)(redis@5.11.0)(ws@8.19.0)
       '@langchain/core':
         specifier: ^1.1.32
         version: 1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0)
@@ -23,21 +23,33 @@ importers:
       '@langchain/openai':
         specifier: ^1.2.13
         version: 1.2.13(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))(ws@8.19.0)
+      '@langchain/pinecone':
+        specifier: ^1.0.1
+        version: 1.0.1(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))(@pinecone-database/pinecone@6.1.4)
       '@langchain/textsplitters':
         specifier: ^1.0.1
         version: 1.0.1(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))
+      '@pinecone-database/pinecone':
+        specifier: ^6.1.4
+        version: 6.1.4
       amqplib:
         specifier: ^0.10.4
         version: 0.10.9
       dotenv:
         specifier: ^17.2.4
         version: 17.3.1
+      install:
+        specifier: ^0.13.0
+        version: 0.13.0
       mongoose:
         specifier: ^9.2.1
         version: 9.3.0
       pdf-parse:
         specifier: ^1.1.1
         version: 1.1.4
+      pnpm:
+        specifier: ^10.32.1
+        version: 10.32.1
       redis:
         specifier: ^5.0.0
         version: 5.11.0
@@ -536,6 +548,13 @@ packages:
     peerDependencies:
       '@langchain/core': ^1.1.32
 
+  '@langchain/pinecone@1.0.1':
+    resolution: {integrity: sha512-iq/dmGg6RF+sMLyIhN5Z9eXgxQsr+vwj19B7HG4utR42mF2VM/yI7KJHnyL0n/LdXsovUi5F4fef8bF7ZlYFyA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@langchain/core': ^1.0.0
+      '@pinecone-database/pinecone': ^5.0.2
+
   '@langchain/textsplitters@1.0.1':
     resolution: {integrity: sha512-rheJlB01iVtrOUzttscutRgLybPH9qR79EyzBEbf1u97ljWyuxQfCwIWK+SjoQTM9O8M7GGLLRBSYE26Jmcoww==}
     engines: {node: '>=20'}
@@ -556,6 +575,10 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
+
+  '@pinecone-database/pinecone@6.1.4':
+    resolution: {integrity: sha512-wkipvpkBYNGYDeYj4azVVyCzSrekJE3Pgo0HImkbw80SGnTo9gz5kSbDCXCfVvFnhqC2q4nGikdTUvFCDiuruA==}
+    engines: {node: '>=18.0.0'}
 
   '@playwright/test@1.58.2':
     resolution: {integrity: sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==}
@@ -929,6 +952,10 @@ packages:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
 
+  install@0.13.0:
+    resolution: {integrity: sha512-zDml/jzr2PKU9I8J/xyZBQn8rPCAY//UOYNmR01XwNwyfhEWObo2SWfSl1+0tm1u6PhxLwDnfsT/6jB7OUxqFA==}
+    engines: {node: '>= 0.10'}
+
   is-binary-path@2.1.0:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
     engines: {node: '>=8'}
@@ -1201,6 +1228,11 @@ packages:
   plimit-lit@1.6.1:
     resolution: {integrity: sha512-B7+VDyb8Tl6oMJT9oSO2CW8XC/T4UcJGrwOVoNGwOQsQYhlpfajmrMj5xeejqaASq3V/EqThyOeATEOMuSEXiA==}
     engines: {node: '>=12'}
+
+  pnpm@10.32.1:
+    resolution: {integrity: sha512-pwaTjw6JrBRWtlY+q07fHR+vM2jRGR/FxZeQ6W3JGORFarLmfWE94QQ9LoyB+HMD5rQNT/7KnfFe8a1Wc0jyvg==}
+    engines: {node: '>=18.12'}
+    hasBin: true
 
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
@@ -1515,7 +1547,7 @@ snapshots:
       - openai
       - ws
 
-  '@langchain/community@1.1.23(@browserbasehq/sdk@2.8.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.3.1)(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.9)(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))(ibm-cloud-sdk-core@5.4.9)(jsonwebtoken@9.0.3)(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(pdf-parse@1.1.4)(playwright@1.58.2)(redis@5.11.0)(ws@8.19.0)':
+  '@langchain/community@1.1.23(@browserbasehq/sdk@2.8.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.3.1)(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6))(@ibm-cloud/watsonx-ai@1.7.9)(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))(@pinecone-database/pinecone@6.1.4)(ibm-cloud-sdk-core@5.4.9)(jsonwebtoken@9.0.3)(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(pdf-parse@1.1.4)(playwright@1.58.2)(redis@5.11.0)(ws@8.19.0)':
     dependencies:
       '@browserbasehq/stagehand': 1.14.0(@playwright/test@1.58.2)(deepmerge@4.3.1)(dotenv@17.3.1)(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(zod@4.3.6)
       '@ibm-cloud/watsonx-ai': 1.7.9
@@ -1533,6 +1565,7 @@ snapshots:
       zod: 4.3.6
     optionalDependencies:
       '@browserbasehq/sdk': 2.8.0
+      '@pinecone-database/pinecone': 6.1.4
       jsonwebtoken: 9.0.3
       pdf-parse: 1.1.4
       playwright: 1.58.2
@@ -1604,6 +1637,13 @@ snapshots:
     transitivePeerDependencies:
       - ws
 
+  '@langchain/pinecone@1.0.1(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))(@pinecone-database/pinecone@6.1.4)':
+    dependencies:
+      '@langchain/core': 1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0)
+      '@pinecone-database/pinecone': 6.1.4
+      flat: 5.0.2
+      uuid: 10.0.0
+
   '@langchain/textsplitters@1.0.1(@langchain/core@1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0))':
     dependencies:
       '@langchain/core': 1.1.32(openai@6.29.0(ws@8.19.0)(zod@4.3.6))(ws@8.19.0)
@@ -1624,6 +1664,8 @@ snapshots:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.1
+
+  '@pinecone-database/pinecone@6.1.4': {}
 
   '@playwright/test@1.58.2':
     dependencies:
@@ -1986,6 +2028,8 @@ snapshots:
 
   ignore@5.3.2: {}
 
+  install@0.13.0: {}
+
   is-binary-path@2.1.0:
     dependencies:
       binary-extensions: 2.3.0
@@ -2189,6 +2233,8 @@ snapshots:
   plimit-lit@1.6.1:
     dependencies:
       queue-lit: 1.5.2
+
+  pnpm@10.32.1: {}
 
   proxy-from-env@1.1.0: {}
 
