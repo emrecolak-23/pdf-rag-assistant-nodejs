@@ -6,6 +6,7 @@ import cors from 'cors';
 import compression from 'compression';
 import session from 'express-session';
 import StatusCodes from 'http-status-codes';
+import MongoStore from 'connect-mongo';
 import path from 'path';
 import fs from 'fs';
 import { injectable, singleton } from 'tsyringe';
@@ -65,8 +66,9 @@ export class PdfServer {
     );
     app.use(
       cors({
-        origin: '*',
-        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
+        origin: ['http://localhost:5173', 'http://localhost:8000', 'http://127.0.0.1:5173', 'http://127.0.0.1:8000'],
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+        credentials: true
       })
     );
     app.use(
@@ -74,7 +76,11 @@ export class PdfServer {
         secret: this.config.SECRET_KEY,
         resave: false,
         saveUninitialized: false,
-        cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }
+        cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
+        store: MongoStore.create({
+          mongoUrl: this.config.MONGODB_URI,
+          touchAfter: 24 * 3600
+        })
       })
     );
     app.use(async (req: Request, _res: Response, next: NextFunction) => {
@@ -118,9 +124,7 @@ export class PdfServer {
       });
     } else {
       app.get('/', (_req: Request, res: Response) => {
-        res.send(
-          '<p>Client not built. Run <code>cd client && pnpm build</code> then restart server.</p>'
-        );
+        res.send('<p>Client not built. Run <code>cd client && pnpm build</code> then restart server.</p>');
       });
     }
   }

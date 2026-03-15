@@ -7,7 +7,8 @@ interface ApiError {
 }
 
 export const api = axios.create({
-	baseURL: '/api'
+	baseURL: '/api',
+	withCredentials: true
 });
 
 api.interceptors.response.use(
