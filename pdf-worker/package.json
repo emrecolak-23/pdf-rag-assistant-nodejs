@@ -1,0 +1,36 @@
+{
+  "name": "pdf-ai-worker",
+  "version": "1.0.0",
+  "description": "PDF processing worker - Celery worker equivalent",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node -r tsconfig-paths/register src/app.ts",
+    "build": "tsc && tsc-alias",
+    "start": "node build/src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.22.0",
+  "dependencies": {
+    "@langchain/classic": "^1.0.23",
+    "@langchain/community": "^1.1.23",
+    "@langchain/core": "^1.1.32",
+    "@langchain/langgraph": "^1.2.2",
+    "@langchain/openai": "^1.2.13",
+    "amqplib": "^0.10.4",
+    "dotenv": "^17.2.4",
+    "mongoose": "^9.2.1",
+    "pdf-parse": "^2.4.5",
+    "redis": "^5.0.0",
+    "reflect-metadata": "^0.2.2",
+    "tsyringe": "^4.10.0",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.5",
+    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0"
+  }
+}

@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+build/
+dist/
+.client/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Uploaded files (local storage)
+pdf-server/public/*.pdf
+!pdf-server/public/.gitkeep
+
+
+.DS_Store
