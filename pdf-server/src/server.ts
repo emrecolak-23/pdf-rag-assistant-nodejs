@@ -52,7 +52,8 @@ export class PdfServer {
         contentSecurityPolicy: {
           directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://cdnjs.cloudflare.com'],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://cdnjs.cloudflare.com', 'blob:'],
+            workerSrc: ["'self'", 'blob:', 'https://cdnjs.cloudflare.com'],
             styleSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
             imgSrc: ["'self'", 'data:', 'blob:'],
             connectSrc: ["'self'"],

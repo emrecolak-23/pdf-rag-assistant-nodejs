@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import * as pdfjs from 'pdfjs-dist';
+	import workerUrl from 'pdfjs-dist/build/pdf.worker.min.js?url';
 
-	pdfjs.GlobalWorkerOptions.workerSrc =
-		'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.5.141/pdf.worker.min.js';
+	pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
 	export let url = '';
 	let canvasContainer: HTMLDivElement;
@@ -46,7 +46,9 @@
 
 	let destroyed = false;
 	onMount(async () => {
-		const pdfDoc = await pdfjs.getDocument(url).promise;
+		if (!url) return;
+		const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url.startsWith('/') ? '' : '/'}${url}`;
+		const pdfDoc = await pdfjs.getDocument({ url: fullUrl, withCredentials: true }).promise;
 
 		if (destroyed) {
 			return;
