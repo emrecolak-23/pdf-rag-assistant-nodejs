@@ -94,6 +94,9 @@ export class ConversationController {
 
       res.write('data: [DONE]\n\n');
       res.end();
+    } else {
+      const content = await chat.run(query);
+      res.status(StatusCodes.OK).json({ role: 'assistant', content });
     }
   }
 }
