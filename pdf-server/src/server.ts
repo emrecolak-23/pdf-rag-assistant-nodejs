@@ -100,7 +100,16 @@ export class PdfServer {
   }
 
   private standardMiddleware(app: Application): void {
-    app.use(compression());
+    app.use(
+      compression({
+        filter: (req, res) => {
+          if (req.headers.accept === 'text/event-stream') {
+            return false;
+          }
+          return compression.filter(req, res);
+        }
+      })
+    );
     app.use(express.json({ limit: '200mb' }));
     app.use(express.urlencoded({ extended: true, limit: '200mb' }));
     app.use((_req: Request, res: Response, next: NextFunction) => {

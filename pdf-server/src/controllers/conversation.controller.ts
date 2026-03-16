@@ -82,14 +82,18 @@ export class ConversationController {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
+      res.flushHeaders();
 
       for await (const chunk of chat.stream(query)) {
-        res.write(chunk);
+        res.write(`data: ${chunk}\n\n`);
+        if (typeof (res as any).flush === 'function') {
+          (res as any).flush();
+        }
       }
+
+      res.write('data: [DONE]\n\n');
       res.end();
-    } else {
-      const content = await chat.run(query);
-      res.json({ role: 'assistant', content });
     }
   }
 }

@@ -60,6 +60,7 @@ export const sendMessage = async (userMessage: Message) => {
 
 		const reader = response.body?.getReader();
 		if (!reader) {
+			set({ loading: false });
 			return;
 		}
 		if (response.status >= 400) {
@@ -67,6 +68,7 @@ export const sendMessage = async (userMessage: Message) => {
 		} else {
 			await readResponse(reader, responseMessage);
 		}
+		set({ loading: false });
 	} catch (err) {
 		set({ error: getErrorMessage(err), loading: false });
 	}
@@ -76,19 +78,32 @@ const readResponse = async (
 	reader: ReadableStreamDefaultReader<Uint8Array>,
 	responseMessage: Message
 ) => {
-	let inProgress = true;
+	const decoder = new TextDecoder();
+	let buffer = '';
 
-	while (inProgress) {
+	while (true) {
 		const { done, value } = await reader.read();
-		if (done) {
-			inProgress = false;
-			break;
+		if (value) {
+			buffer += decoder.decode(value, { stream: true });
 		}
-		const text = new TextDecoder().decode(value);
 
-		if (responseMessage.id) {
-			_appendResponse(responseMessage.id, text);
+		const events = buffer.split('\n\n');
+		buffer = events.pop() ?? '';
+
+		for (const event of events) {
+			const line = event.split('\n')[0];
+			if (line?.startsWith('data: ')) {
+				const content = line.slice(6);
+				if (content === '[DONE]') {
+					return;
+				}
+				if (responseMessage.id) {
+					_appendResponse(responseMessage.id, content);
+				}
+			}
 		}
+
+		if (done) break;
 	}
 };
 

@@ -52,40 +52,26 @@ export class ChatService {
       ['human', '{input}']
     ]);
 
-    const chain = RunnableSequence.from([
-      RunnableLambda.from(async (input: any) => {
-        console.log('2. chain lambda started');
-        const chatHistory = input.chat_history || [];
-        let query: string;
-        if (chatHistory.length === 0) {
-          query = input.input;
-        } else {
-          query = await contextualizeChain.invoke(input);
-        }
-
-        console.log('3. calling retriever with:', query);
-        const docs = await retriever.invoke(query);
-        console.log('4. retriever returned docs:', docs.length);
-        const context = docs.map((doc: any) => doc.pageContent).join('\n\n');
-
-        return {
-          context,
-          chat_history: chatHistory,
-          input: input.input
-        };
-      }),
-      RunnableLambda.from(async (input: any) => {
-        console.log('5. formatting prompt with keys:', Object.keys(input));
-        const formatted = await answerPrompt.invoke(input);
-        console.log('6. prompt formatted, calling LLM...');
-        const response = await llm.invoke(formatted);
-        console.log('7. LLM responded');
-        return response.content;
-      })
-    ]);
-
     const chainWithHistory = new RunnableWithMessageHistory({
-      runnable: chain,
+      runnable: RunnableSequence.from([
+        RunnableLambda.from(async (input: any) => {
+          const chatHistory = input.chat_history || [];
+          let query: string;
+          if (chatHistory.length === 0) {
+            query = input.input;
+          } else {
+            query = await contextualizeChain.invoke(input);
+          }
+
+          const docs = await retriever.invoke(query);
+          const context = docs.map((doc: any) => doc.pageContent).join('\n\n');
+
+          return { context, chat_history: chatHistory, input: input.input };
+        }),
+        answerPrompt,
+        llm,
+        new StringOutputParser()
+      ]),
       getMessageHistory: (sessionId) => new MongooseChatMessageHistoryService(sessionId),
       inputMessagesKey: 'input',
       historyMessagesKey: 'chat_history'
@@ -97,15 +83,16 @@ export class ChatService {
 
     return {
       run: async (input: string) => {
-        console.log('1. run started:', input);
         const response = await chainWithHistory.invoke({ input }, config);
-        console.log('8. run finished');
         return typeof response === 'string' ? response : String(response);
       },
       stream: async function* (input: string) {
-        const response = await chainWithHistory.invoke({ input }, config);
-        const text = typeof response === 'string' ? response : String(response);
-        yield text;
+        const stream = await chainWithHistory.stream({ input }, config);
+        for await (const chunk of stream) {
+          if (chunk) {
+            yield typeof chunk === 'string' ? chunk : String(chunk);
+          }
+        }
       }
     };
   }
