@@ -39,7 +39,7 @@ export class ScoreController {
   }
 
   async listScores(_req: Request, res: Response): Promise<void> {
-    const scores = this.chatService.getScores();
+    const scores = await this.chatService.getScores();
     res.json(scores);
   }
 }

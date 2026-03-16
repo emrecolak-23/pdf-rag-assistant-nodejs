@@ -21,9 +21,13 @@ export class LLMFactory {
     return this.strategies.flatMap((s) => s.getSupportedModels().map((m) => m.name));
   }
 
-  pickRandom(): string {
+  pickRandom(redisScores?: Record<string, number>): string {
     const options = this.strategies.flatMap((s) => s.getSupportedModels());
-    return pickWeightedRandom(options.map((m) => ({ value: m.name, score: m.score })));
+    const items = options.map((m) => {
+      const score = redisScores?.[m.name] ?? m.score;
+      return { value: m.name, score: Math.max(0.1, score) };
+    });
+    return pickWeightedRandom(items);
   }
 
   create(modelName: string): BaseChatModel {

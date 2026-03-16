@@ -23,8 +23,12 @@ export class MemoryFactory {
     return [...this.strategies.keys()];
   }
 
-  pickRandom(): string {
-    return pickWeightedRandom([...this.strategies.entries()].map(([name, s]) => ({ value: name, score: s.score })));
+  pickRandom(redisScores?: Record<string, number>): string {
+    const items = [...this.strategies.entries()].map(([name, s]) => {
+      const score = redisScores?.[name] ?? s.score;
+      return { value: name, score: Math.max(0.1, score) };
+    });
+    return pickWeightedRandom(items);
   }
 
   create(name: string, sessionId: string): BaseListChatMessageHistory {

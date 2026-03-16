@@ -6,6 +6,7 @@ import { IConversationDocument } from '@pdf/models/conversation.schema';
 import { MemoryFactory } from '@pdf/strategies/memory/memory.factory';
 import { RetrieverFactory } from '@pdf/strategies/retriever/retriever.factory';
 import { LLMFactory } from '@pdf/strategies/llm/llm.factory';
+import { ScoreService } from './score.service';
 
 @injectable()
 @singleton()
@@ -15,7 +16,8 @@ export class ConversationService {
     private readonly messageRepository: MessageRepository,
     @inject(MemoryFactory) private readonly memoryFactory: MemoryFactory,
     @inject(RetrieverFactory) private readonly retrieverFactory: RetrieverFactory,
-    @inject(LLMFactory) private readonly llmFactory: LLMFactory
+    @inject(LLMFactory) private readonly llmFactory: LLMFactory,
+    private readonly scoreService: ScoreService
   ) {}
 
   async getByPdfId(pdfId: string): Promise<any[]> {
@@ -33,12 +35,14 @@ export class ConversationService {
   }
 
   async create(userId: string, pdfId: string): Promise<IConversationDocument> {
+    const scores = await this.scoreService.getScores();
+
     return this.conversationRepository.create({
       userId: new Types.ObjectId(userId),
       pdfId: new Types.ObjectId(pdfId),
-      llm: this.llmFactory.pickRandom(),
-      memory: this.memoryFactory.pickRandom(),
-      retriever: this.retrieverFactory.pickRandom()
+      llm: this.llmFactory.pickRandom(scores.llm),
+      memory: this.memoryFactory.pickRandom(scores.memory),
+      retriever: this.retrieverFactory.pickRandom(scores.retriever)
     });
   }
 

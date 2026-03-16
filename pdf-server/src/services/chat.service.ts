@@ -6,6 +6,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { MemoryFactory } from '@pdf/strategies/memory/memory.factory';
 import { RetrieverFactory } from '@pdf/strategies/retriever/retriever.factory';
 import { LLMFactory } from '@pdf/strategies/llm/llm.factory';
+import { ScoreService } from './score.service';
 
 export interface ChatArgs {
   conversationId: string;
@@ -30,12 +31,16 @@ export class ChatService {
     private readonly conversationService: ConversationService,
     private readonly memoryFactory: MemoryFactory,
     private readonly retrieverFactory: RetrieverFactory,
-    private readonly llmFactory: LLMFactory
+    private readonly llmFactory: LLMFactory,
+    private readonly scoreService: ScoreService
   ) {}
 
   async buildChat(chatArgs: ChatArgs): Promise<IChat | null> {
-    const { llm: llmName, retriever: retrieverName, memory: memoryType } =
-      await this.conversationService.getComponents(chatArgs.conversationId);
+    const {
+      llm: llmName,
+      retriever: retrieverName,
+      memory: memoryType
+    } = await this.conversationService.getComponents(chatArgs.conversationId);
 
     if (!llmName || !retrieverName || !memoryType) {
       throw new Error('Conversation missing llm, retriever or memory components');
@@ -106,9 +111,11 @@ export class ChatService {
     };
   }
 
-  scoreConversation(_conversationId: string, _score: number, _llm: string, _retriever: string, _memory: string): void {}
+  scoreConversation(_conversationId: string, score: number, llm: string, retriever: string, memory: string): void {
+    this.scoreService.recordScore(score, llm, retriever, memory);
+  }
 
-  getScores(): Record<string, Record<string, number[]>> {
-    return {};
+  async getScores(): Promise<Record<string, Record<string, number>>> {
+    return this.scoreService.getScores();
   }
 }
