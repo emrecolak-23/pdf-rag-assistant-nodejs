@@ -7,7 +7,13 @@ import { IConversationDocument } from '@pdf/models/conversation.schema';
 export class ConversationRepository {
   constructor(@inject('ConversationModel') private readonly conversationModel: Model<IConversationDocument>) {}
 
-  async create(data: { pdfId: Types.ObjectId; userId: Types.ObjectId }): Promise<IConversationDocument> {
+  async create(data: {
+    pdfId: Types.ObjectId;
+    userId: Types.ObjectId;
+    llm?: string;
+    memory?: string;
+    retriever?: string;
+  }): Promise<IConversationDocument> {
     return this.conversationModel.create(data);
   }
 

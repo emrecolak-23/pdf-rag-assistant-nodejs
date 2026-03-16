@@ -5,6 +5,7 @@ import { IMemoryStrategy } from '../memory-strategy.interface';
 @injectable()
 export class WindowMemoryStrategy implements IMemoryStrategy {
   readonly name = 'window';
+  readonly score = 0.5;
 
   private readonly windowSize: number;
 

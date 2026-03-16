@@ -1,15 +1,21 @@
-import { injectable, singleton } from 'tsyringe';
+import { inject, injectable, singleton } from 'tsyringe';
 import { Types } from 'mongoose';
 import { ConversationRepository } from '@pdf/repositories/conversation.repository';
 import { MessageRepository } from '@pdf/repositories/message.repository';
 import { IConversationDocument } from '@pdf/models/conversation.schema';
+import { MemoryFactory } from '@pdf/strategies/memory/memory.factory';
+import { RetrieverFactory } from '@pdf/strategies/retriever/retriever.factory';
+import { LLMFactory } from '@pdf/strategies/llm/llm.factory';
 
 @injectable()
 @singleton()
 export class ConversationService {
   constructor(
     private readonly conversationRepository: ConversationRepository,
-    private readonly messageRepository: MessageRepository
+    private readonly messageRepository: MessageRepository,
+    @inject(MemoryFactory) private readonly memoryFactory: MemoryFactory,
+    @inject(RetrieverFactory) private readonly retrieverFactory: RetrieverFactory,
+    @inject(LLMFactory) private readonly llmFactory: LLMFactory
   ) {}
 
   async getByPdfId(pdfId: string): Promise<any[]> {
@@ -29,7 +35,10 @@ export class ConversationService {
   async create(userId: string, pdfId: string): Promise<IConversationDocument> {
     return this.conversationRepository.create({
       userId: new Types.ObjectId(userId),
-      pdfId: new Types.ObjectId(pdfId)
+      pdfId: new Types.ObjectId(pdfId),
+      llm: this.llmFactory.pickRandom(),
+      memory: this.memoryFactory.pickRandom(),
+      retriever: this.retrieverFactory.pickRandom()
     });
   }
 

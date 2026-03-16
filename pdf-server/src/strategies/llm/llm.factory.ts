@@ -1,5 +1,6 @@
 import { inject, injectable, singleton } from 'tsyringe';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { pickWeightedRandom } from '@pdf/utils/weighted-random';
 import { ILLMStrategy } from './llm-strategy.interface';
 import { OpenAILLMStrategy } from './strategies/openai.llm.strategy';
 import { ClaudeLLMStrategy } from './strategies/claude.llm.strategy';
@@ -14,6 +15,15 @@ export class LLMFactory {
     @inject(ClaudeLLMStrategy) claudeStrategy: ClaudeLLMStrategy
   ) {
     this.strategies = [openaiStrategy, claudeStrategy];
+  }
+
+  getAvailableOptions(): string[] {
+    return this.strategies.flatMap((s) => s.getSupportedModels().map((m) => m.name));
+  }
+
+  pickRandom(): string {
+    const options = this.strategies.flatMap((s) => s.getSupportedModels());
+    return pickWeightedRandom(options.map((m) => ({ value: m.name, score: m.score })));
   }
 
   create(modelName: string): BaseChatModel {

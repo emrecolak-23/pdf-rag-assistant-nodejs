@@ -34,11 +34,15 @@ export class ChatService {
   ) {}
 
   async buildChat(chatArgs: ChatArgs): Promise<IChat | null> {
-    const components = await this.conversationService.getComponents(chatArgs.conversationId);
+    const { llm: llmName, retriever: retrieverName, memory: memoryType } =
+      await this.conversationService.getComponents(chatArgs.conversationId);
 
-    const llm = this.llmFactory.create(components.llm || 'gpt-4o-mini');
-    const retriever = await this.retrieverFactory.create(components.retriever || 'pinecone', chatArgs);
-    const memoryType = components.memory || 'mongoose';
+    if (!llmName || !retrieverName || !memoryType) {
+      throw new Error('Conversation missing llm, retriever or memory components');
+    }
+
+    const llm = this.llmFactory.create(llmName);
+    const retriever = await this.retrieverFactory.create(retrieverName, chatArgs);
 
     const contextualizePrompt = ChatPromptTemplate.fromMessages([
       [

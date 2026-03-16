@@ -6,6 +6,7 @@ import { IRetrieverStrategy } from '../retriever-strategy.interface';
 @injectable()
 export class PineconeRetrieverStrategy implements IRetrieverStrategy {
   readonly name = 'pinecone';
+  readonly score = 1;
 
   constructor(private readonly pineconeService: PineconeService) {}
 
