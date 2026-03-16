@@ -28,36 +28,25 @@ export class ScoreService {
   }
 
   async getScores(): Promise<ComponentScores> {
-    const availableLlms = new Set(this.llmFactory.getAvailableOptions());
-    const availableMemories = new Set(this.memoryFactory.getAvailableOptions());
-    const availableRetrievers = new Set(this.retrieverFactory.getAvailableOptions());
+    const available: Record<string, Set<string>> = {
+      llm: new Set(this.llmFactory.getAvailableOptions()),
+      retriever: new Set(this.retrieverFactory.getAvailableOptions()),
+      memory: new Set(this.memoryFactory.getAvailableOptions())
+    };
 
-    const aggregate = async (
-      valuesKey: string,
-      countKey: string,
-      allowedNames: Set<string>
-    ) => {
-      const values = await this.redis.redisClient.hGetAll(valuesKey);
-      const counts = await this.redis.redisClient.hGetAll(countKey);
+    const componentScores: ComponentScores = { llm: {}, retriever: {}, memory: {} };
 
-      const result: Record<string, number> = {};
+    for (const type of Object.keys(componentScores) as Array<keyof ComponentScores>) {
+      const values = await this.redis.redisClient.hGetAll(`${type}_scores_values`);
+      const counts = await this.redis.redisClient.hGetAll(`${type}_scores_count`);
+
       for (const name of Object.keys(values)) {
-        if (!allowedNames.has(name)) continue;
-        const totalScore = parseFloat(values[name] || '0');
+        if (!available[type].has(name)) continue;
         const totalCount = parseInt(counts[name] || '0', 10);
-        result[name] = totalCount > 0 ? totalScore / totalCount : 0;
+        componentScores[type][name] = totalCount > 0 ? parseFloat(values[name] || '0') / totalCount : 0;
       }
-      return result;
-    };
+    }
 
-    return {
-      llm: await aggregate('llm_scores_values', 'llm_scores_count', availableLlms),
-      retriever: await aggregate(
-        'retriever_scores_values',
-        'retriever_scores_count',
-        availableRetrievers
-      ),
-      memory: await aggregate('memory_scores_values', 'memory_scores_count', availableMemories)
-    };
+    return componentScores;
   }
 }
