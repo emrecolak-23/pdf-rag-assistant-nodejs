@@ -64,9 +64,17 @@ const insertMessageToActive = (message: Message) => {
 	store.update((s) => {
 		const conv = s.conversations.find((c) => c.id === s.activeConversationId);
 		if (!conv) {
-			return;
+			return s;
 		}
-		conv.messages.push(message);
+		const messages = conv.messages ?? [];
+		return {
+			...s,
+			conversations: s.conversations.map((c) =>
+				c.id === s.activeConversationId
+					? { ...c, messages: [...messages, message] }
+					: c
+			)
+		};
 	});
 };
 
@@ -74,9 +82,15 @@ const removeMessageFromActive = (id: number) => {
 	store.update((s) => {
 		const conv = s.conversations.find((c) => c.id === s.activeConversationId);
 		if (!conv) {
-			return;
+			return s;
 		}
-		conv.messages = conv.messages.filter((m) => m.id != id);
+		const messages = (conv.messages ?? []).filter((m) => m.id != id);
+		return {
+			...s,
+			conversations: s.conversations.map((c) =>
+				c.id === s.activeConversationId ? { ...c, messages } : c
+			)
+		};
 	});
 };
 
@@ -89,10 +103,14 @@ const scoreConversation = async (score: number) => {
 const fetchConversations = async (documentId: number) => {
 	const { data } = await api.get<Conversation[]>(`/conversations?pdf_id=${documentId}`);
 
-	if (data.length) {
+	if (data?.length) {
+		const conversations: Conversation[] = data.map((c) => ({
+			...c,
+			messages: c.messages ?? []
+		}));
 		set({
-			conversations: data,
-			activeConversationId: data[0].id
+			conversations,
+			activeConversationId: conversations[0].id
 		});
 	} else {
 		await createConversation(documentId);
@@ -102,12 +120,17 @@ const fetchConversations = async (documentId: number) => {
 const createConversation = async (documentId: number) => {
 	const { data } = await api.post<Conversation>(`/conversations?pdf_id=${documentId}`);
 
+	const conversation: Conversation = {
+		...data,
+		messages: data.messages ?? []
+	};
+
 	set({
-		activeConversationId: data.id,
-		conversations: [data, ...get(store).conversations]
+		activeConversationId: conversation.id,
+		conversations: [conversation, ...get(store).conversations]
 	});
 
-	return data;
+	return conversation;
 };
 
 const setActiveConversationId = (id: number) => {

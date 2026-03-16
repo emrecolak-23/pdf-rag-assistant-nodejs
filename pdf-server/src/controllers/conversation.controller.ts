@@ -41,6 +41,12 @@ export class ConversationController {
     const { input } = req.body;
     const streaming = req.query.stream === 'true';
 
+    const query = typeof input === 'string' ? input.trim() : '';
+    if (!query) {
+      res.status(StatusCodes.BAD_REQUEST).json({ message: 'input is required and must be a non-empty string' });
+      return;
+    }
+
     const conversation = await this.conversationService.findById(conversationId as string);
     if (!conversation) {
       res.status(StatusCodes.NOT_FOUND).json({ message: 'Conversation not found' });
@@ -65,7 +71,7 @@ export class ConversationController {
       }
     };
 
-    const chat = this.chatService.buildChat(chatArgs);
+    const chat = await this.chatService.buildChat(chatArgs);
 
     if (!chat) {
       res.send('Chat not yet implemented!');
@@ -77,12 +83,12 @@ export class ConversationController {
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
 
-      for await (const chunk of chat.stream(input)) {
+      for await (const chunk of chat.stream(query)) {
         res.write(chunk);
       }
       res.end();
     } else {
-      const content = await chat.run(input);
+      const content = await chat.run(query);
       res.json({ role: 'assistant', content });
     }
   }

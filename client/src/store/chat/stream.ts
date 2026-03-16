@@ -10,16 +10,21 @@ const _addMessage = (message: Message) => {
 const _appendResponse = (id: number, text: string) => {
 	store.update((state) => {
 		const conv = state.conversations.find((c) => c.id === state.activeConversationId);
-		if (!conv) {
-			return;
+		if (!conv || !conv.messages) {
+			return state;
 		}
-		conv.messages = conv.messages.map((message) => {
+		const messages = conv.messages.map((message) => {
 			if (message.id === id) {
-				message.content += text;
-				message.role = 'assistant';
+				return { ...message, content: message.content + text, role: 'assistant' as const };
 			}
 			return message;
 		});
+		return {
+			...state,
+			conversations: state.conversations.map((c) =>
+				c.id === state.activeConversationId ? { ...c, messages } : c
+			)
+		};
 	});
 };
 
