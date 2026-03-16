@@ -1,17 +1,17 @@
 # PDF.ai
 
-PDF dokümanlarıyla sohbet edebileceğiniz RAG (Retrieval Augmented Generation) tabanlı bir uygulama. LangChain, Pinecone ve çoklu LLM desteği ile geliştirilmiştir.
+A RAG (Retrieval Augmented Generation) application for chatting with PDF documents. Built with LangChain, Pinecone, and multi-LLM support.
 
-## Özellikler
+## Features
 
-- **PDF Yükleme & İşleme** — PDF dosyalarını yükleyin, otomatik olarak parse edilip vektörleştirilir
-- **RAG Sohbet** — Doküman içeriğine dayalı soru-cevap
-- **Streaming Yanıtlar** — Gerçek zamanlı yanıt akışı
-- **Çoklu LLM Desteği** — OpenAI (gpt-4o, gpt-4o-mini, gpt-4.1 serisi) ve Anthropic Claude
-- **Skor Tabanlı Seçim** — Kullanıcı puanlarına göre LLM, memory ve retriever bileşenleri ağırlıklı rastgele seçilir
-- **Kimlik Doğrulama** — Kayıt ve giriş
+- **PDF Upload & Processing** — Upload PDF files; they are automatically parsed and vectorized
+- **RAG Chat** — Question-answering based on document content
+- **Streaming Responses** — Real-time response streaming
+- **Multi-LLM Support** — OpenAI (gpt-4o, gpt-4o-mini, gpt-4.1 series) and Anthropic Claude
+- **Score-Based Selection** — LLM, memory, and retriever components are weighted randomly based on user ratings
+- **Authentication** — Sign up and sign in
 
-## Mimari
+## Architecture
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
@@ -26,15 +26,15 @@ PDF dokümanlarıyla sohbet edebileceğiniz RAG (Retrieval Augmented Generation)
                     └────────────┘      └────────────┘
 ```
 
-### Paketler
+### Packages
 
-| Paket | Açıklama |
-|-------|----------|
+| Package | Description |
+|---------|-------------|
 | **client** | SvelteKit + Tailwind CSS frontend |
-| **pdf-server** | Express API, chat, auth, dosya yönetimi |
-| **pdf-worker** | PDF işleme, embedding, Pinecone indeksleme (RabbitMQ consumer) |
+| **pdf-server** | Express API, chat, auth, file management |
+| **pdf-worker** | PDF processing, embedding, Pinecone indexing (RabbitMQ consumer) |
 
-## Gereksinimler
+## Requirements
 
 - Node.js 18+
 - pnpm
@@ -42,31 +42,31 @@ PDF dokümanlarıyla sohbet edebileceğiniz RAG (Retrieval Augmented Generation)
 - Redis
 - RabbitMQ
 - OpenAI API Key
-- Pinecone API Key (ve index)
+- Pinecone API Key (and index)
 
-## Kurulum
+## Installation
 
-### 1. Bağımlılıkları yükleyin
+### 1. Install dependencies
 
 ```bash
 pnpm install
-# veya her paket için ayrı ayrı:
+# or for each package separately:
 cd client && pnpm install
 cd pdf-server && pnpm install
 cd pdf-worker && pnpm install
 ```
 
-### 2. Altyapıyı başlatın (Docker)
+### 2. Start infrastructure (Docker)
 
 ```bash
 docker-compose up -d
 ```
 
-Bu komut MongoDB, Redis ve RabbitMQ'yu başlatır.
+This starts MongoDB, Redis, and RabbitMQ.
 
-### 3. Ortam değişkenleri
+### 3. Environment variables
 
-`pdf-server` ve `pdf-worker` için `.env` dosyaları oluşturun:
+Create `.env` files for `pdf-server` and `pdf-worker`:
 
 **pdf-server/.env**
 ```env
@@ -94,15 +94,15 @@ PINECONE_INDEX_NAME=...
 INTERNAL_API_KEY=...
 ```
 
-### 4. Uygulamayı çalıştırın
+### 4. Run the application
 
-Üç terminalde sırasıyla:
+In three separate terminals:
 
 ```bash
 # 1. API Server
 cd pdf-server && pnpm dev
 
-# 2. Worker (PDF işleme)
+# 2. Worker (PDF processing)
 cd pdf-worker && pnpm dev
 
 # 3. Client
@@ -115,34 +115,34 @@ cd client && pnpm dev
 
 ## API Endpoints
 
-| Method | Endpoint | Açıklama |
-|--------|----------|----------|
-| POST | `/api/auth/signup` | Kayıt |
-| POST | `/api/auth/signin` | Giriş |
-| GET | `/api/pdfs` | PDF listesi |
-| POST | `/api/pdfs` | PDF yükleme |
-| GET | `/api/conversations` | Konuşma listesi |
-| POST | `/api/conversations` | Yeni konuşma |
-| POST | `/api/conversations/:id/messages` | Mesaj gönder (stream destekli) |
-| PUT | `/api/scores` | Konuşma puanlama |
-| GET | `/api/scores` | Skor özeti |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/signup` | Sign up |
+| POST | `/api/auth/signin` | Sign in |
+| GET | `/api/pdfs` | List PDFs |
+| POST | `/api/pdfs` | Upload PDF |
+| GET | `/api/conversations` | List conversations |
+| POST | `/api/conversations` | Create conversation |
+| POST | `/api/conversations/:id/messages` | Send message (streaming supported) |
+| PUT | `/api/scores` | Rate conversation |
+| GET | `/api/scores` | Score summary |
 
-## Skor Sistemi
+## Score System
 
-Kullanıcılar konuşmaları puanlayabilir (-1 ile 1 arası). Bu puanlar Redis'te saklanır ve yeni konuşma oluşturulurken:
+Users can rate conversations (between -1 and 1). Scores are stored in Redis and when creating new conversations:
 
-- **LLM**, **memory** ve **retriever** bileşenleri ağırlıklı rastgele seçilir
-- Ortalama skoru yüksek bileşenler daha sık seçilir
-- Redis'te skor yoksa stratejilerin varsayılan skorları kullanılır
+- **LLM**, **memory**, and **retriever** components are selected via weighted random
+- Components with higher average scores are selected more often
+- If no scores exist in Redis, default strategy scores are used
 
-## Teknolojiler
+## Technologies
 
 - **Frontend**: SvelteKit, Tailwind CSS, Axios
 - **Backend**: Express, TypeScript, tsyringe (DI)
 - **AI**: LangChain, OpenAI, Anthropic, Pinecone
-- **Veritabanı**: MongoDB, Redis
-- **Kuyruk**: RabbitMQ
+- **Database**: MongoDB, Redis
+- **Queue**: RabbitMQ
 
-## Lisans
+## License
 
 ISC
