@@ -2,11 +2,16 @@ import { injectable } from 'tsyringe';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ILLMStrategy } from '../llm-strategy.interface';
 
-@injectable()
-export class ClaudeSonnetLLMStrategy implements ILLMStrategy {
-  readonly name = 'claude-sonnet-4-20250514';
+const SUPPORTED_MODELS = ['claude-sonnet-4-20250514', 'claude-sonnet'];
 
-  create(): ChatAnthropic {
-    return new ChatAnthropic({ model: 'claude-sonnet-4-20250514' });
+@injectable()
+export class ClaudeLLMStrategy implements ILLMStrategy {
+  supports(modelName: string): boolean {
+    return modelName.startsWith('claude-') || SUPPORTED_MODELS.includes(modelName);
+  }
+
+  create(modelName: string): ChatAnthropic {
+    const resolved = modelName === 'claude-sonnet' ? 'claude-sonnet-4-20250514' : modelName;
+    return new ChatAnthropic({ model: resolved });
   }
 }

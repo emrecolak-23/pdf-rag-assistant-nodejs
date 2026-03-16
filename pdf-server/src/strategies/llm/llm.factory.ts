@@ -1,31 +1,28 @@
 import { inject, injectable, singleton } from 'tsyringe';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { ILLMStrategy } from './llm-strategy.interface';
-import { Gpt4oMiniLLMStrategy } from './strategies/gpt4omini.llm.strategy';
-import { Gpt4oLLMStrategy } from './strategies/gpt4o.llm.strategy';
-import { ClaudeSonnetLLMStrategy } from './strategies/claude.llm.strategy';
+import { OpenAILLMStrategy } from './strategies/openai.llm.strategy';
+import { ClaudeLLMStrategy } from './strategies/claude.llm.strategy';
 
 @injectable()
 @singleton()
 export class LLMFactory {
-  private readonly strategies: Map<string, ILLMStrategy> = new Map();
+  private readonly strategies: ILLMStrategy[];
 
   constructor(
-    @inject(Gpt4oMiniLLMStrategy) gpt4oMiniStrategy: Gpt4oMiniLLMStrategy,
-    @inject(Gpt4oLLMStrategy) gpt4oStrategy: Gpt4oLLMStrategy,
-    @inject(ClaudeSonnetLLMStrategy) claudeStrategy: ClaudeSonnetLLMStrategy
+    @inject(OpenAILLMStrategy) openaiStrategy: OpenAILLMStrategy,
+    @inject(ClaudeLLMStrategy) claudeStrategy: ClaudeLLMStrategy
   ) {
-    this.strategies.set(gpt4oMiniStrategy.name, gpt4oMiniStrategy);
-    this.strategies.set(gpt4oStrategy.name, gpt4oStrategy);
-    this.strategies.set(claudeStrategy.name, claudeStrategy);
-    this.strategies.set('claude-sonnet', claudeStrategy); // alias
+    this.strategies = [openaiStrategy, claudeStrategy];
   }
 
-  create(name: string): BaseChatModel {
-    const strategy = this.strategies.get(name);
+  create(modelName: string): BaseChatModel {
+    const strategy = this.strategies.find((s) => s.supports(modelName));
     if (!strategy) {
-      throw new Error(`Unknown LLM strategy: ${name}. Available: ${[...new Set(this.strategies.keys())].join(', ')}`);
+      throw new Error(
+        `Unsupported LLM: ${modelName}. Supported: gpt-4o-mini, gpt-4o, claude-sonnet-4-20250514`
+      );
     }
-    return strategy.create();
+    return strategy.create(modelName);
   }
 }

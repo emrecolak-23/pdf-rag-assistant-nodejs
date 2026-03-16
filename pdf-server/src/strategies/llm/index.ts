@@ -1,5 +1,4 @@
 export { LLMFactory } from './llm.factory';
 export { ILLMStrategy } from './llm-strategy.interface';
-export { Gpt4oMiniLLMStrategy } from './strategies/gpt4omini.llm.strategy';
-export { Gpt4oLLMStrategy } from './strategies/gpt4o.llm.strategy';
-export { ClaudeSonnetLLMStrategy } from './strategies/claude.llm.strategy';
+export { OpenAILLMStrategy } from './strategies/openai.llm.strategy';
+export { ClaudeLLMStrategy } from './strategies/claude.llm.strategy';
