@@ -7,6 +7,7 @@ import { MemoryFactory } from '@pdf/strategies/memory/memory.factory';
 import { RetrieverFactory } from '@pdf/strategies/retriever/retriever.factory';
 import { LLMFactory } from '@pdf/strategies/llm/llm.factory';
 import { ScoreService } from './score.service';
+import { TracingService } from './tracing.service';
 
 export interface ChatArgs {
   conversationId: string;
@@ -32,7 +33,8 @@ export class ChatService {
     private readonly memoryFactory: MemoryFactory,
     private readonly retrieverFactory: RetrieverFactory,
     private readonly llmFactory: LLMFactory,
-    private readonly scoreService: ScoreService
+    private readonly scoreService: ScoreService,
+    private readonly tracingService: TracingService
   ) {}
 
   async buildChat(chatArgs: ChatArgs): Promise<IChat | null> {
@@ -48,6 +50,12 @@ export class ChatService {
 
     const llm = this.llmFactory.create(llmName);
     const retriever = await this.retrieverFactory.create(retrieverName, chatArgs);
+
+    const langfuseHandler = this.tracingService.createHandler({
+      sessionId: chatArgs.conversationId,
+      userId: chatArgs.metadata.user_id,
+      tags: ['pdf-chat', `llm:${llmName}`, `retriever:${retrieverName}`, `memory:${memoryType}`]
+    });
 
     const contextualizePrompt = ChatPromptTemplate.fromMessages([
       [
@@ -92,7 +100,8 @@ export class ChatService {
     });
 
     const config = {
-      configurable: { sessionId: chatArgs.conversationId }
+      configurable: { sessionId: chatArgs.conversationId },
+      callbacks: [langfuseHandler]
     };
 
     return {
