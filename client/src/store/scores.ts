@@ -1,11 +1,11 @@
 export interface Scores {
 	llm: {
-		[name: string]: number[];
+		[name: string]: number;
 	};
 	retriever: {
-		[name: string]: number[];
+		[name: string]: number;
 	};
 	memory: {
-		[name: string]: number[];
+		[name: string]: number;
 	};
 }

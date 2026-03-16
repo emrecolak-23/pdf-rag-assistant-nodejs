@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
 
-	export let data: { [key: string]: number[] };
+	export let data: { [key: string]: number | number[] };
 	export let startingColor: { r: number; g: number; b: number };
 
 	let chartCanvas: HTMLCanvasElement;
@@ -14,8 +14,10 @@
 		}
 
 		const labels = Object.keys(data);
-		const chartValues = Object.values(data).map(
-			(scores) => scores.reduce((a, b) => a + b, 0) / scores.length
+		const chartValues = Object.values(data).map((scores) =>
+			Array.isArray(scores)
+				? scores.reduce((a, b) => a + b, 0) / scores.length
+				: scores
 		);
 
 		new Chart(ctx, {
