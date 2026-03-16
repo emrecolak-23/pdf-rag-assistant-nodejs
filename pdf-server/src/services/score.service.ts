@@ -19,12 +19,14 @@ export class ScoreService {
   recordScore(score: number, llm: string, retriever: string, memory: string): void {
     score = Math.min(Math.max(score, 0), 1);
 
-    this.redis.redisClient.hIncrBy('llm_scores_values', llm, score);
-    this.redis.redisClient.hIncrBy('llm_scores_count', llm, 1);
-    this.redis.redisClient.hIncrBy('retriever_scores_values', retriever, score);
-    this.redis.redisClient.hIncrBy('retriever_scores_count', retriever, 1);
-    this.redis.redisClient.hIncrBy('memory_scores_values', memory, score);
-    this.redis.redisClient.hIncrBy('memory_scores_count', memory, 1);
+    const pipeline = this.redis.redisClient.multi();
+    pipeline.hIncrBy('llm_scores_values', llm, score);
+    pipeline.hIncrBy('llm_scores_count', llm, 1);
+    pipeline.hIncrBy('retriever_scores_values', retriever, score);
+    pipeline.hIncrBy('retriever_scores_count', retriever, 1);
+    pipeline.hIncrBy('memory_scores_values', memory, score);
+    pipeline.hIncrBy('memory_scores_count', memory, 1);
+    pipeline.exec();
   }
 
   async getScores(): Promise<ComponentScores> {
