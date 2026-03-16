@@ -1,11 +1,12 @@
 import { injectable, singleton } from 'tsyringe';
-import { PineconeService } from './pinecone.service';
-import { ChatOpenAI } from '@langchain/openai';
+import { ConversationService } from './conversation.service';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
-
 import { RunnableLambda, RunnableSequence, RunnableWithMessageHistory } from '@langchain/core/runnables';
-import { MongooseChatMessageHistoryService } from './mongoose-chat-message-history.service';
 import { StringOutputParser } from '@langchain/core/output_parsers';
+import { MemoryFactory } from '@pdf/strategies/memory/memory.factory';
+import { RetrieverFactory } from '@pdf/strategies/retriever/retriever.factory';
+import { LLMFactory } from '@pdf/strategies/llm/llm.factory';
+
 export interface ChatArgs {
   conversationId: string;
   pdfId: string;
@@ -25,15 +26,19 @@ interface IChat {
 @injectable()
 @singleton()
 export class ChatService {
-  constructor(private readonly pineconeService: PineconeService) {}
+  constructor(
+    private readonly conversationService: ConversationService,
+    private readonly memoryFactory: MemoryFactory,
+    private readonly retrieverFactory: RetrieverFactory,
+    private readonly llmFactory: LLMFactory
+  ) {}
 
   async buildChat(chatArgs: ChatArgs): Promise<IChat | null> {
-    const retriever = await this.pineconeService.buildRetriever(chatArgs);
+    const components = await this.conversationService.getComponents(chatArgs.conversationId);
 
-    const llm = new ChatOpenAI({
-      model: 'gpt-4o-mini',
-      temperature: 0
-    });
+    const llm = this.llmFactory.create(components.llm || 'gpt-4o-mini');
+    const retriever = await this.retrieverFactory.create(components.retriever || 'pinecone', chatArgs);
+    const memoryType = components.memory || 'mongoose';
 
     const contextualizePrompt = ChatPromptTemplate.fromMessages([
       [
@@ -72,7 +77,7 @@ export class ChatService {
         llm,
         new StringOutputParser()
       ]),
-      getMessageHistory: (sessionId) => new MongooseChatMessageHistoryService(sessionId),
+      getMessageHistory: (sessionId) => this.memoryFactory.create(memoryType, sessionId),
       inputMessagesKey: 'input',
       historyMessagesKey: 'chat_history'
     });

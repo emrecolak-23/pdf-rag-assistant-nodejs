@@ -7,8 +7,13 @@ import { UserModel } from '@pdf/models/user.schema';
 import { PdfModel } from '@pdf/models/pdf.schema';
 import { ConversationModel } from '@pdf/models/conversation.schema';
 import { MessageModel } from '@pdf/models/message.schema';
+import { WindowMemoryStrategy } from '@pdf/strategies/memory/strategies/window.memory.strategy';
 
 const database = container.resolve(Database);
+
+container.register(WindowMemoryStrategy, {
+  useFactory: () => new WindowMemoryStrategy(10)
+});
 const redis = container.resolve(Redis);
 
 container.register('UserModel', { useValue: UserModel });
